@@ -1,4 +1,4 @@
-#-*-coding: utf-8-*-
+#-*-coding: utf-8-*-jijijijij
 from random import choice
 ##############################################################################
 # Variables globales
