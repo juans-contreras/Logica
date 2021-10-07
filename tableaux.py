@@ -27,6 +27,8 @@ def Inorder(f):
     # Imprime una formula como cadena dada una formula como arbol
     # Input: tree, que es una formula de logica proposicional
     # Output: string de la formula
+
+
 	if f.right == None:
 		return f.label
 	elif f.label == '-':
@@ -78,6 +80,18 @@ def Inorder2Tree(A):
 	else:
 		return -1
 
+############propias###########################################################
+
+def polaca(f):
+    if f.label=="-":
+        return polaca(f.right)+"-"
+    elif f.label not in conectivos:
+        return f.label
+    elif f.label in conectivos:
+        return polaca(f.left)+polaca(f.right)+f.label
+    else:
+        return "error"
+
 ##############################################################################
 # Definición de funciones de tableaux
 ##############################################################################
@@ -102,51 +116,78 @@ def complemento(l):
 	# Input: l, un literal
 	# Output: x, un literal
 
-	pass
+	if(l.right==None):
+		return (Tree("-",None,l))
+	elif(l.label=="-"):
+		return(l.right)
 
-def par_complementario(l):
+def par_complementario(h):
 	# Esta función determina si una lista de solo literales
 	# contiene un par complementario
 	# Input: l, una lista de literales
 	# Output: True/False
-
-	pass
+	h_nuevo=[]
+	for i in h:
+		h_nuevo.append(Inorder(i))
+	for i in h:
+		a=complemento(i)
+		if a in h_nuevo:
+			return True
+	return False
 
 def es_literal(f):
 	# Esta función determina si el árbol f es un literal
 	# Input: f, una fórmula como árbol
 	# Output: True/False
-	if f.label=='-':
-		a=f.right
-		if a.label=='-' or a.label in conectivos:
-		    return False
-		else:
-		    return True
-    	else:
-		if f.label not in conectivos:
-		    return True
-		else:
-		    return False
-   
+    if f.label=='-':
+        a=f.right
+        if a.label=='-' or a.label in conectivos:
+            return False
+        else:
+            return True
+    else:
+        if f.label not in conectivos:
+            return True
+        else:
+            return False
+    
+    
 
 def no_literales(l):
 	# Esta función determina si una lista de fórmulas contiene
 	# solo literales
 	# Input: l, una lista de fórmulas como árboles
 	# Output: None/f, tal que f no es literal
-
-	for i in l:
-		if es_literal(i):
-		    return i
-        else:
-        	return None
+    for i in l:
+        if not es_literal(i):
+            return i
+    return None
 
 def clasificacion(f):
 	# clasifica una fórmula como alfa o beta
 	# Input: f, una fórmula como árbol
 	# Output: string de la clasificación de la formula
 
-	pass
+	if(f.label=="-"):
+		a=f.right
+		if(a.label=="-"):
+			return "Alfa1"
+		elif(a.label=="O"):
+			return "Alfa3"
+		elif(a.label=="Y"):
+			return "Beta1"
+		elif(a.label=='>'):
+			return "Alfa4"
+	elif(f.label=="Y"):
+		return "Alfa2"
+
+	if(f.label=="O"):
+		return "Beta2"
+	elif(f.label==">"):
+		return "Beta3"
+	else:
+		return "error en la clasificacion"
+
 
 def clasifica_y_extiende(f, h):
 	# Extiende listaHojas de acuerdo a la regla respectiva
@@ -170,7 +211,37 @@ def clasifica_y_extiende(f, h):
 		listaHojas.remove(h)
 		listaHojas.append(aux)
 	elif clase == 'Alfa2':
-		pass
+		aux = [x for x in h if x != f] + [f.right]+[f.left]
+		listaHojas.remove(h)
+		listaHojas.append(aux)
+	elif clase == 'Alfa3':
+		aux = [x for x in h if x != f] + [Tree("-",None,f.right.right)]+[Tree("-",None,f.right.left)]
+		listaHojas.remove(h)
+		listaHojas.append(aux)
+	elif clase == 'Alfa4':
+		aux = [x for x in h if x != f] + [complemento(f.right.right)]+[f.right.left]
+		listaHojas.remove(h)
+		listaHojas.append(aux)
+	elif clase == 'Beta1':
+		aux1 = [x for x in h if x != f] + [complemento(f.right.right)]
+		aux2 = [x for x in h if x != f] + [complemento(f.right.left)]
+		listaHojas.remove(h)
+		listaHojas.append(aux1)
+		listaHojas.append(aux2)
+	elif clase == 'Beta2':
+		aux1 = [x for x in h if x != f] + [f.right]
+		aux2 = [x for x in h if x != f] + [f.left]
+		listaHojas.remove(h)
+		listaHojas.append(aux1)
+		listaHojas.append(aux2)
+	elif clase == 'Beta3':
+		aux1 = [x for x in h if x != f] + [complemento(f.left)]
+		aux2 = [x for x in h if x != f] + [f.right]
+		listaHojas.remove(h)
+		listaHojas.append(aux1)
+		listaHojas.append(aux2)
+
+
 	# Aqui el resto de casos
 
 
@@ -201,5 +272,4 @@ def Tableaux(f):
 				listaHojas.remove(h)
 		else:
 			clasifica_y_extiende(x, h)
-
 	return listaInterpsVerdaderas
